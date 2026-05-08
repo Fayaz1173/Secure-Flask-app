@@ -1,12 +1,12 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 import time
-import smtplib
 import os
 import secrets
 import re
 import requests
-from email.mime.text import MIMEText
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 from dotenv import load_dotenv
@@ -34,8 +34,7 @@ app.config.update(
 
 app.permanent_session_lifetime = timedelta(minutes=30)
 
-EMAIL_USER = os.getenv("MAIL_USERNAME")
-EMAIL_PASS = os.getenv("MAIL_PASSWORD")
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
 RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
@@ -72,20 +71,20 @@ def verify_recaptcha(response_token):
     return result.get("success", False)
 
 def send_otp_email(to_email, otp):
-    if not EMAIL_USER or not EMAIL_PASS:
+    if not SENDGRID_API_KEY:
         print("ENV email config missing")
         return False
 
-    msg = MIMEText(f"Your OTP is {otp}. It expires in 5 minutes.")
-    msg["Subject"] = "Email Verification OTP"
-    msg["From"] = EMAIL_USER
-    msg["To"] = to_email
+    message = Mail(
+        from_email="noreply@secureflaskapp.com",
+        to_emails=to_email,
+        subject="Email Verification OTP",
+        plain_text_content=f"Your OTP is {otp}. It expires in 5 minutes."
+    )
 
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.send_message(msg)
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        sg.send(message)
         print("OTP email sent successfully")
         return True
     except Exception as e:
