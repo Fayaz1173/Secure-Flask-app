@@ -71,24 +71,21 @@ def verify_recaptcha(response_token):
     return result.get("success", False)
 
 def send_otp_email(to_email, otp):
-    if not SENDGRID_API_KEY:
-        print("ENV email config missing")
-        return False
-
     message = Mail(
-        from_email="noreply@secureflaskapp.com",
+        from_email='noreply@secureflaskapp.com',
         to_emails=to_email,
-        subject="Email Verification OTP",
-        plain_text_content=f"Your OTP is {otp}. It expires in 5 minutes."
+        subject='Your OTP Code',
+        html_content=f'<strong>Your OTP is: {otp}</strong>'
     )
-
     try:
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        sg.send(message)
-        print("OTP email sent successfully")
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        print("STATUS CODE:", response.status_code)
+        print("RESPONSE BODY:", response.body)
+        print("HEADERS:", response.headers)
         return True
     except Exception as e:
-        print("EMAIL ERROR:", e)
+        print("SENDGRID ERROR:", str(e))
         return False
 
 def generate_otp():
