@@ -72,7 +72,7 @@ def verify_recaptcha(response_token):
 
 def send_otp_email(to_email, otp):
     message = Mail(
-        from_email='noreply@secureflaskapp.com',
+        from_email='noorfayaz007@gmail.com',
         to_emails=to_email,
         subject='Your OTP Code',
         html_content=f'<strong>Your OTP is: {otp}</strong>'
