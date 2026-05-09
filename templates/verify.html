@@ -1,6 +1,21 @@
 {% extends 'base.html' %}
 {% block title %}Verify OTP{% endblock %}
 {% block content %}
+    {% if verified %}
+    <div id="successModal" class="modal show">
+        <div class="modal-content success-modal">
+            <div class="checkmark">✓</div>
+            <h2>Email Verified Successfully!</h2>
+            <p>Your account is now active.</p>
+            <button onclick="window.location.href='{{ url_for('login') }}'" class="btn btn-primary">Continue to Login</button>
+        </div>
+    </div>
+    <script>
+        setTimeout(function() {
+            window.location.href = '{{ url_for("login") }}';
+        }, 3000);
+    </script>
+    {% else %}
     <h2>Verify OTP</h2>
     <p>For {{ email }}</p>
     {% if message %}
@@ -13,4 +28,5 @@
     <div class="links">
         <a href="/" class="btn btn-secondary">Back to Login</a>
     </div>
+    {% endif %}
 {% endblock %}
