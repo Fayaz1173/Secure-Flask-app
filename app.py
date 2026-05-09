@@ -174,7 +174,7 @@ def verify(email):
                 user.otp = None
                 user.otp_expiry = None
                 db.session.commit()
-                return redirect(url_for("login"))
+                return render_template("verify.html", message="OTP verified successfully!", email=email, verified=True)
             else:
                 message = "Invalid OTP."
         else:
